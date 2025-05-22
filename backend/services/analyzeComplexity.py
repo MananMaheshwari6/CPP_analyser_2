@@ -3,9 +3,29 @@ import sys
 from clang import cindex
 import tempfile
 
-# Replace with the actual path to your LLVM installation
-llvm_path = r"C:\Program Files\LLVM\bin"
-cindex.Config.set_library_file(os.path.join(llvm_path, "libclang.dll"))
+# Try to find LLVM installation based on OS
+try:
+    import platform
+    system = platform.system()
+
+    if system == 'Windows':
+        llvm_path = r"C:\Program Files\LLVM\bin"
+        lib_name = "libclang.dll"
+    elif system == 'Linux':
+        llvm_path = "/usr/lib/llvm-12/lib"
+        lib_name = "libclang.so.1"
+    elif system == 'Darwin':  # macOS
+        llvm_path = "/usr/local/opt/llvm/lib"
+        lib_name = "libclang.dylib"
+    else:
+        llvm_path = ""
+        lib_name = ""
+
+    if llvm_path and os.path.exists(llvm_path):
+        cindex.Config.set_library_file(os.path.join(llvm_path, lib_name))
+except Exception as e:
+    print(f"Failed to configure LLVM: {e}", file=sys.stderr)
+    # Continue with default paths as fallback
 
 
 def count_loops_and_allocations(node, loop_count=0, alloc_count=0, recursion=False, func_name=None):

@@ -15,19 +15,20 @@ exports.analyzeCode = async (req, res) => {
         const [time, space] = output.trim().split(',');
 
         try {
-            // Try to save to MongoDB first
-            const entry = new CodeHistory({ code, timeComplexity: time, spaceComplexity: space });
-            await entry.save();
-            console.log("Saved to MongoDB");
-        } catch (dbError) {
-            // Fall back to in-memory storage if MongoDB fails
-            console.log("MongoDB save failed, using in-memory storage:", dbError.message);
-            inMemoryDb.codeHistory.push({
+            // Save with user ID if authenticated
+            const userId = req.userId || 'guest';
+            const historyData = {
                 code,
                 timeComplexity: time,
                 spaceComplexity: space,
-                createdAt: new Date().toISOString()
-            });
+                userId
+            };
+
+            // Try to save to database
+            await CodeHistory.create(historyData);
+            console.log("Saved analysis to history");
+        } catch (dbError) {
+            console.error("Failed to save analysis history:", dbError.message);
         }
 
         res.json({ timeComplexity: time, spaceComplexity: space });
@@ -39,13 +40,23 @@ exports.analyzeCode = async (req, res) => {
 
 exports.getHistory = async (req, res) => {
     try {
-        // Try to get history from MongoDB first
-        const history = await CodeHistory.find().sort({ createdAt: -1 });
+        // Get user-specific history if authenticated
+        const userId = req.userId || null;
+
+        let query = {};
+        if (userId) {
+            // If authenticated, get user's history
+            query = { userId };
+        } else {
+            // If not authenticated, only get guest entries (for demo purposes)
+            // In a real app, you might not show any history for unauthenticated users
+            query = { userId: 'guest' };
+        }
+
+        const history = await CodeHistory.find(query).sort({ createdAt: -1 });
         res.json(history);
     } catch (err) {
-        console.log("MongoDB query failed, using in-memory data:", err.message);
-        // Fall back to in-memory data if MongoDB fails
-        res.json(inMemoryDb.codeHistory.sort((a, b) =>
-            new Date(b.createdAt) - new Date(a.createdAt)));
+        console.error("Failed to fetch history:", err.message);
+        res.status(500).json({ error: "Failed to fetch history" });
     }
 };

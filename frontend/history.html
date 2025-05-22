@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis History - Code Analyzer</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span>Code</span><span>Analyzer</span>
+        </div>
+        <div class="theme-toggle">
+            <span class="toggle-icon">🌙</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle-input" checked>
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-icon">☀️</span>
+
+            <!-- User info (shown when logged in) -->
+            <div class="user-info hidden" id="user-info">
+                <div class="user-avatar">G</div>
+                <span class="username-display">Guest</span>
+
+                <!-- Dropdown menu -->
+                <div class="user-dropdown hidden" id="user-dropdown">
+                    <a href="index.html" class="user-dropdown-item">Analyzer</a>
+                    <a href="history.html" class="user-dropdown-item">My History</a>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="#" class="user-dropdown-item logout-item" id="logout-btn">Logout</a>
+                </div>
+            </div>
+
+            <!-- Auth buttons (shown when not logged in) -->
+            <div class="auth-header-buttons" id="auth-header-buttons">
+                <a href="login.html" class="btn header-auth-btn">Login</a>
+                <a href="register.html" class="btn header-auth-btn" style="background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color);">Register</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="card">
+                <h2>Analysis History</h2>
+                <p id="history-subtitle">View your past code analysis results</p>
+                <div id="auth-message" class="auth-message hidden">
+                    <p>Please <a href="login.html">log in</a> or <a href="register.html">register</a> to view your personal analysis history.</p>
+                </div>
+                <a href="index.html" class="btn" style="display: inline-block; margin-bottom: 1rem;">Back to Analyzer</a>
+
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Code Snippet</th>
+                            <th>Time Complexity</th>
+                            <th>Space Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- History items will be loaded here -->
+                        <tr>
+                            <td colspan="4" class="empty-history">
+                                <div id="loading-indicator" style="text-align: center; margin-top: 1rem;">
+                                    <div class="spinner"></div>
+                                    <p>Loading history...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const historyTableBody = document.getElementById('history-table-body');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const themeToggle = document.getElementById('theme-toggle-input');
+            const authMessage = document.getElementById('auth-message');
+            const historySubtitle = document.getElementById('history-subtitle');
+
+            // Theme toggle
+            themeToggle.addEventListener('change', function() {
+                document.body.classList.toggle('light-mode');
+            });
+
+            // Listen for auth state changes
+            document.addEventListener('authStateChanged', function(e) {
+                const { isAuthenticated, user } = e.detail;
+
+                if (isAuthenticated) {
+                    authMessage.classList.add('hidden');
+                    historySubtitle.textContent = `View your personal analysis history, ${user.username}`;
+                    loadHistoryData();
+                } else {
+                    authMessage.classList.remove('hidden');
+                    historySubtitle.textContent = 'View analysis history';
+                    // Still load history for guest user
+                    loadHistoryData();
+                }
+            });
+
+            // Load history data
+            function loadHistoryData() {
+                fetch('/api/history', {
+                    method: 'GET',
+                    credentials: 'include' // Important for sending auth cookies
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('History data:', data);
+                    historyTableBody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        historyTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="empty-history">
+                                    <p>No analysis history found. Analyze some code first!</p>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    // Create table rows for each history item
+                    data.forEach(item => {
+                        const date = new Date(item.createdAt).toLocaleString();
+                        const codeSnippet = truncateCode(item.code, 50);
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${date}</td>
+                            <td><pre>${codeSnippet}</pre></td>
+                            <td class="complexity">${item.timeComplexity}</td>
+                            <td class="complexity">${item.spaceComplexity}</td>
+                        `;
+
+                        historyTableBody.appendChild(row);
+                    });
+
+                    // Set colors for complexity values
+                    document.querySelectorAll('.complexity').forEach(el => {
+                        const complexity = el.textContent;
+                        if (complexity === 'O(1)' || complexity === 'O(log n)') {
+                            el.style.color = '#10b981';
+                        } else if (complexity === 'O(n)' || complexity === 'O(n log n)') {
+                            el.style.color = '#f59e0b';
+                        } else {
+                            el.style.color = '#ef4444';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading history:', error);
+                    historyTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-history">
+                                <p>Failed to load history. Please try again later.</p>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Helper function to truncate code for display
+            function truncateCode(code, maxLength) {
+                if (code.length <= maxLength) return code;
+                return code.substring(0, maxLength) + '...';
+            }
+        });
+    </script>
+
+    <style>
+        /* Additional styles for history page */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .history-table th, .history-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .history-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .history-table pre {
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-width: 300px;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+        }
+    </style>
+</body>
+</html>

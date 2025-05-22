@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ Complexity Examples - Code Analyzer</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span>Code</span><span>Analyzer</span>
+        </div>
+        <div class="theme-toggle">
+            <span class="toggle-icon">🌙</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="theme-toggle-input" checked>
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-icon">☀️</span>
+
+            <!-- User info (shown when logged in) -->
+            <div class="user-info hidden" id="user-info">
+                <div class="user-avatar">G</div>
+                <span class="username-display">Guest</span>
+
+                <!-- Dropdown menu -->
+                <div class="user-dropdown hidden" id="user-dropdown">
+                    <a href="index.html" class="user-dropdown-item">Analyzer</a>
+                    <a href="history.html" class="user-dropdown-item">My History</a>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="#" class="user-dropdown-item logout-item" id="logout-btn">Logout</a>
+                </div>
+            </div>
+
+            <!-- Auth buttons (shown when not logged in) -->
+            <div class="auth-header-buttons" id="auth-header-buttons">
+                <a href="login.html" class="btn header-auth-btn">Login</a>
+                <a href="register.html" class="btn header-auth-btn" style="background-color: transparent; border: 1px solid var(--primary-color); color: var(--primary-color);">Register</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="card">
+                <h2>C++ Code Complexity Examples</h2>
+                <p>Examples of C++ code with different time and space complexities</p>
+                <a href="index.html" class="btn" style="display: inline-block; margin-bottom: 1rem;">Back to Analyzer</a>
+
+                <div class="examples-container">
+                    <div class="example-card">
+                        <h3>O(1) Time Complexity - Constant Time</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+
+int main() {
+    int x = 10;
+    int y = 20;
+    int sum = x + y;
+    std::cout << "Sum: " << sum << std::endl;
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-good">O(1)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-good">O(1)</span></p>
+                            <p>This code has constant time complexity because it performs a fixed number of operations regardless of input size.</p>
+                        </div>
+                    </div>
+
+                    <div class="example-card">
+                        <h3>O(n) Time Complexity - Linear Time</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int main() {
+    std::vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int sum = 0;
+
+    for (int num : numbers) {
+        sum += num;
+    }
+
+    std::cout << "Sum: " << sum << std::endl;
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-moderate">O(n)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-good">O(1)</span></p>
+                            <p>This code has linear time complexity because it iterates through each element of the vector once, so the time grows linearly with the input size.</p>
+                        </div>
+                    </div>
+
+                    <div class="example-card">
+                        <h3>O(n²) Time Complexity - Quadratic Time</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int main() {
+    std::vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    for (int i = 0; i < numbers.size(); i++) {
+        for (int j = 0; j < numbers.size(); j++) {
+            std::cout << numbers[i] * numbers[j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-poor">O(n²)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-good">O(1)</span></p>
+                            <p>This code has quadratic time complexity because of the nested loops, where both iterate through the entire vector.</p>
+                        </div>
+                    </div>
+
+                    <div class="example-card">
+                        <h3>O(log n) Time Complexity - Logarithmic Time</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int binarySearch(const std::vector&lt;int&gt;& arr, int target) {
+    int left = 0;
+    int right = arr.size() - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+
+        if (arr[mid] == target)
+            return mid;
+
+        if (arr[mid] < target)
+            left = mid + 1;
+        else
+            right = mid - 1;
+    }
+
+    return -1;
+}
+
+int main() {
+    std::vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int target = 7;
+
+    int result = binarySearch(numbers, target);
+
+    std::cout << "Target found at index: " << result << std::endl;
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-good">O(log n)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-good">O(1)</span></p>
+                            <p>This binary search algorithm has logarithmic time complexity because it halves the search space with each iteration.</p>
+                        </div>
+                    </div>
+
+                    <div class="example-card">
+                        <h3>O(n log n) Time Complexity</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+
+int main() {
+    std::vector&lt;int&gt; numbers = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+
+    // Sort the vector (typically implements quicksort or mergesort)
+    std::sort(numbers.begin(), numbers.end());
+
+    for (int num : numbers) {
+        std::cout << num << " ";
+    }
+
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-moderate">O(n log n)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-good">O(1)</span> to <span class="complexity-moderate">O(n)</span></p>
+                            <p>Sorting algorithms like quicksort and mergesort have O(n log n) time complexity. The space complexity depends on the specific sorting algorithm implementation.</p>
+                        </div>
+                    </div>
+
+                    <div class="example-card">
+                        <h3>O(2^n) Time Complexity - Exponential Time</h3>
+                        <div class="example-code">
+<pre class="code-block">#include &lt;iostream&gt;
+
+int fibonacci(int n) {
+    if (n <= 1)
+        return n;
+    return fibonacci(n-1) + fibonacci(n-2);
+}
+
+int main() {
+    int n = 10;
+    std::cout << "Fibonacci(" << n << ") = " << fibonacci(n) << std::endl;
+    return 0;
+}</pre>
+                        </div>
+                        <div class="complexity-info">
+                            <p><strong>Time Complexity:</strong> <span class="complexity-poor">O(2^n)</span></p>
+                            <p><strong>Space Complexity:</strong> <span class="complexity-moderate">O(n)</span></p>
+                            <p>This recursive Fibonacci implementation has exponential time complexity due to calculating the same values multiple times. The space complexity is O(n) due to the call stack depth.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle-input');
+
+            // Theme toggle
+            themeToggle.addEventListener('change', function() {
+                document.body.classList.toggle('light-mode');
+            });
+        });
+    </script>
+
+    <style>
+        /* Additional styles for examples page */
+        .examples-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .example-card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .example-card h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .example-code {
+            margin-bottom: 1rem;
+            background-color: var(--background-darker);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block {
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            white-space: pre;
+            font-size: 0.9rem;
+        }
+
+        .complexity-info {
+            background-color: rgba(31, 230, 211, 0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .complexity-good {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .complexity-moderate {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .complexity-poor {
+            color: #ef4444;
+            font-weight: 600;
+        }
+    </style>
+</body>
+</html>
